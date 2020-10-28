@@ -1,11 +1,11 @@
-package kubeml
+package k8sml
 
 import (
 	"gopkg.in/yaml.v3"
  	"reflect"
 	"strings"
 	"errors"
-	terraform "kubearch/kubearch/proletarian/terraform"
+	terraform "KubeArch/kubearch/proletarian/terraform"
 )
 
 type Subnet struct {
@@ -61,14 +61,14 @@ func (subnet *Subnet) AddRuntimeVariable(key, value string) {
 func (subnet *Subnet) ExportModule() error {
 	e := reflect.ValueOf(subnet).Elem()
 
-	subnetType := strings.Split(reflect.TypeOf(subnet).String(), "*kubeml.")[1]
+	subnetType := strings.Split(reflect.TypeOf(subnet).String(), "*k8sml.")[1]
 	cloud := subnet.Kubernetes.Cloud
-	provider := strings.Split(cloud.GetCloudProvider().GetType(), "*kubeml.")[1]
-	cloudType := strings.Split(reflect.TypeOf(cloud).String(), "*kubeml.")[1]
+	provider := strings.Split(cloud.GetCloudProvider().GetType(), "*k8sml.")[1]
+	cloudType := strings.Split(reflect.TypeOf(cloud).String(), "*k8sml.")[1]
 	ipv4cidr := subnet.Kubernetes.Cloud.GetIPv4Cidr()
-	ipv4cidrType := strings.Split(reflect.TypeOf(ipv4cidr).String(), "*kubeml.")[1]
+	ipv4cidrType := strings.Split(reflect.TypeOf(ipv4cidr).String(), "*k8sml.")[1]
 
-	module := terraform.NewModule(subnet.ID, provider, strings.Split(reflect.TypeOf(subnet).String(), "*kubeml.")[1])
+	module := terraform.NewModule(subnet.ID, provider, strings.Split(reflect.TypeOf(subnet).String(), "*k8sml.")[1])
 	for i := 0; i < e.NumField(); i++ {
 		key := e.Type().Field(i).Name
 		value := e.Field(i).Interface()

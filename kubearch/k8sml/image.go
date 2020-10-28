@@ -1,21 +1,22 @@
-package kubeml
+package k8sml
 
 import (
 	"reflect"
 	"strings"
 )
 
-type ContainerNetworkInterface struct {
+type Image struct {
 	ID string `yaml:"id"`
-	Kubernetes *Kubernetes
+	User string `yaml:"user"`
+	VirtualMachine VirtualMachine
 }
 
-func (cni *ContainerNetworkInterface) GetID() string {
-	return cni.ID
+func (image *Image) GetID() string {
+	return image.ID
 }
 
-func (cni *ContainerNetworkInterface) GetVariableValue(variable string) interface{} {
-	e := reflect.ValueOf(cni).Elem()
+func (image *Image) GetVariableValue(variable string) interface{} {
+	e := reflect.ValueOf(image).Elem()
 	var value interface{}
 
 	for i := 0; i < e.NumField(); i++ {

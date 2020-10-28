@@ -1,6 +1,6 @@
-package kubeml
+package k8sml
 
-type KubeML interface {
+type K8sML interface {
 	GetID() string
 	GetVariableValue(variable string) interface{}
 }

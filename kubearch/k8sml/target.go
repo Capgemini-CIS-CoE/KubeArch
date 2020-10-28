@@ -1,4 +1,4 @@
-package kubeml
+package k8sml
 
 type Target interface {
 	GetTargetID() string

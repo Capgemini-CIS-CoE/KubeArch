@@ -1,10 +1,10 @@
-package kubeml
+package k8sml
 
 import (
 	"gopkg.in/yaml.v3"
 	 "reflect"
 	 "strings"
-	terraform "kubearch/kubearch/proletarian/terraform" 
+	terraform "KubeArch/kubearch/proletarian/terraform" 
 )
 
 type VirtualPrivateCloud struct {
@@ -55,8 +55,8 @@ func (vpc *VirtualPrivateCloud) AddRuntimeVariable(key, value string) {
 }
 
 func (vpc *VirtualPrivateCloud) ExportModule() error {
-	vpcType := strings.Split(reflect.TypeOf(vpc).String(), "*kubeml.")[1]
-	module := terraform.NewModule(vpc.ID, strings.Split(vpc.CloudProvider.GetType(), "*kubeml.")[1], strings.Split(reflect.TypeOf(vpc).String(), "*kubeml.")[1])
+	vpcType := strings.Split(reflect.TypeOf(vpc).String(), "*k8sml.")[1]
+	module := terraform.NewModule(vpc.ID, strings.Split(vpc.CloudProvider.GetType(), "*k8sml.")[1], strings.Split(reflect.TypeOf(vpc).String(), "*k8sml.")[1])
 
 	e := reflect.ValueOf(vpc).Elem()
 	

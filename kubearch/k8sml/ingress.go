@@ -1,10 +1,10 @@
-package kubeml
+package k8sml
 
 import (
 	"gopkg.in/yaml.v3"
 	"strings"
 	"reflect"
-	terraform "kubearch/kubearch/proletarian/terraform"
+	terraform "KubeArch/kubearch/proletarian/terraform"
 )
 
 type Ingress struct {
@@ -55,10 +55,10 @@ func (ingress *Ingress) AddRuntimeVariable(key, value string) {
 func (ingress *Ingress) ExportModule() error {
 	e := reflect.ValueOf(ingress).Elem()
 	
-	provider := strings.Split(ingress.VirtualFirewall.GetSubnet().Kubernetes.Cloud.GetCloudProvider().GetType(), "*kubeml.")[1]
-	vfType := strings.Split(reflect.TypeOf(ingress.VirtualFirewall).String(), "*kubeml.")[1]
+	provider := strings.Split(ingress.VirtualFirewall.GetSubnet().Kubernetes.Cloud.GetCloudProvider().GetType(), "*k8sml.")[1]
+	vfType := strings.Split(reflect.TypeOf(ingress.VirtualFirewall).String(), "*k8sml.")[1]
 
-	module := terraform.NewModule(ingress.ID, provider, strings.Split(reflect.TypeOf(ingress).String(), "*kubeml.")[1])
+	module := terraform.NewModule(ingress.ID, provider, strings.Split(reflect.TypeOf(ingress).String(), "*k8sml.")[1])
 	for i := 0; i < e.NumField(); i++ {
 		key := e.Type().Field(i).Name
 		value := e.Field(i).Interface()

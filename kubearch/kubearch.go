@@ -7,9 +7,9 @@ import (
     "flag"
     "strings"
     "path/filepath"
-    kubeml "kubearch/kubearch/kubeml"
-    ansible "kubearch/kubearch/proletarian/ansible"
-    proletarian "kubearch/kubearch/proletarian"
+    k8sml "KubeArch/kubearch/k8sml"
+    ansible "KubeArch/kubearch/proletarian/ansible"
+    proletarian "KubeArch/kubearch/proletarian"
 )
 
 func main() {
@@ -45,13 +45,13 @@ func main() {
 
     productionPlan.ProductionOrder = nil
     for _, aws := range productionPlan.Products["AmazonWebServices"] {
-      productionPlan.ProductionOrder = append(productionPlan.ProductionOrder, aws.(kubeml.Infrastructure))
+      productionPlan.ProductionOrder = append(productionPlan.ProductionOrder, aws.(k8sml.Infrastructure))
     }
     for _, tg := range productionPlan.Products["TargetGroup"] {
-      productionPlan.ProductionOrder = append(productionPlan.ProductionOrder, tg.(kubeml.Infrastructure))
+      productionPlan.ProductionOrder = append(productionPlan.ProductionOrder, tg.(k8sml.Infrastructure))
     }
     for _, nlb := range productionPlan.Products["NetworkLoadBalancer"] {
-      productionPlan.ProductionOrder = append(productionPlan.ProductionOrder, nlb.(kubeml.Infrastructure))
+      productionPlan.ProductionOrder = append(productionPlan.ProductionOrder, nlb.(k8sml.Infrastructure))
     }
 
     if err := productionPlan.BuildInfrastructure(); err != nil {

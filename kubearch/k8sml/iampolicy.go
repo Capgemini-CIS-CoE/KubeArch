@@ -1,9 +1,9 @@
-package kubeml
+package k8sml
 
 import (
 	"reflect"
 	"strings"
-	terraform "kubearch/kubearch/proletarian/terraform"
+	terraform "KubeArch/kubearch/proletarian/terraform"
 )
 
 type IAMPolicy struct {
@@ -53,7 +53,7 @@ func (policy *IAMPolicy) AddRuntimeVariable(key, value string) {
 func (policy *IAMPolicy) ExportModule() error {
 	e := reflect.ValueOf(policy).Elem()
 
-    module := terraform.NewModule(policy.ID, strings.Split(policy.CloudProvider.GetType(), "*kubeml.")[1], strings.Split(reflect.TypeOf(policy).String(), "*kubeml.")[1])
+    module := terraform.NewModule(policy.ID, strings.Split(policy.CloudProvider.GetType(), "*k8sml.")[1], strings.Split(reflect.TypeOf(policy).String(), "*k8sml.")[1])
     for i := 0; i < e.NumField(); i++ {
 		key := e.Type().Field(i).Name
         value := e.Field(i).Interface()

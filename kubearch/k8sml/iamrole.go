@@ -1,9 +1,9 @@
-package kubeml
+package k8sml
 
 import (
 	"reflect"
 	"strings"
-	terraform "kubearch/kubearch/proletarian/terraform"
+	terraform "KubeArch/kubearch/proletarian/terraform"
 )
 
 type IAMRole struct {
@@ -50,10 +50,10 @@ func (role *IAMRole) AddRuntimeVariable(key, value string) {
 func (role *IAMRole) ExportModule() error {
 	e := reflect.ValueOf(role).Elem()
 
-	roleType := strings.Split(reflect.TypeOf(role).String(), "*kubeml.")[1]
-	policyType := strings.Split(reflect.TypeOf(role.Policy).String(), "*kubeml.")[1]
+	roleType := strings.Split(reflect.TypeOf(role).String(), "*k8sml.")[1]
+	policyType := strings.Split(reflect.TypeOf(role.Policy).String(), "*k8sml.")[1]
 
-    module := terraform.NewModule(role.ID, strings.Split(role.Policy.CloudProvider.GetType(), "*kubeml.")[1], strings.Split(reflect.TypeOf(role).String(), "*kubeml.")[1])
+    module := terraform.NewModule(role.ID, strings.Split(role.Policy.CloudProvider.GetType(), "*k8sml.")[1], strings.Split(reflect.TypeOf(role).String(), "*k8sml.")[1])
     for i := 0; i < e.NumField(); i++ {
 		key := e.Type().Field(i).Name
         value := e.Field(i).Interface()

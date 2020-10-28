@@ -1,4 +1,4 @@
-package kubeml
+package k8sml
 
 type Infrastructure interface {
 	GetID() string

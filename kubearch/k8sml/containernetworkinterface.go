@@ -1,22 +1,21 @@
-package kubeml
+package k8sml
 
 import (
 	"reflect"
 	"strings"
 )
 
-type Key struct {
+type ContainerNetworkInterface struct {
 	ID string `yaml:"id"`
-	Path string `yaml:"path"`
-	VirtualMachines []VirtualMachine
+	Kubernetes *Kubernetes
 }
 
-func (key *Key) GetID() string {
-	return key.ID
+func (cni *ContainerNetworkInterface) GetID() string {
+	return cni.ID
 }
 
-func (key *Key) GetVariableValue(variable string) interface{} {
-	e := reflect.ValueOf(key).Elem()
+func (cni *ContainerNetworkInterface) GetVariableValue(variable string) interface{} {
+	e := reflect.ValueOf(cni).Elem()
 	var value interface{}
 
 	for i := 0; i < e.NumField(); i++ {

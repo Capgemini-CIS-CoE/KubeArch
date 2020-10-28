@@ -1,10 +1,10 @@
-package kubeml
+package k8sml
 
 import (
 	"gopkg.in/yaml.v3"
 	"reflect"
 	"strings"
-	terraform "kubearch/kubearch/proletarian/terraform"
+	terraform "KubeArch/kubearch/proletarian/terraform"
 )
 
 type TargetGroup struct {
@@ -55,11 +55,11 @@ func (tg *TargetGroup) AddRuntimeVariable(key, value string) {
 func (tg *TargetGroup) ExportModule() error {
 	e := reflect.ValueOf(tg).Elem()
 
-	provider := strings.Split(tg.VirtualFirewall.GetSubnet().Kubernetes.Cloud.GetCloudProvider().GetType(), "*kubeml.")[1]
+	provider := strings.Split(tg.VirtualFirewall.GetSubnet().Kubernetes.Cloud.GetCloudProvider().GetType(), "*k8sml.")[1]
 	cloud := tg.VirtualFirewall.GetSubnet().Kubernetes.Cloud
-	cloudType := strings.Split(reflect.TypeOf(cloud).String(), "*kubeml.")[1]
+	cloudType := strings.Split(reflect.TypeOf(cloud).String(), "*k8sml.")[1]
 
-	module := terraform.NewModule(tg.ID, provider, strings.Split(reflect.TypeOf(tg).String(), "*kubeml.")[1])
+	module := terraform.NewModule(tg.ID, provider, strings.Split(reflect.TypeOf(tg).String(), "*k8sml.")[1])
 	for i := 0; i < e.NumField(); i++ {
 		key := e.Type().Field(i).Name
 		value := e.Field(i).Interface()
@@ -72,7 +72,7 @@ func (tg *TargetGroup) ExportModule() error {
 	}
 
 	for _, target := range tg.Target.VirtualMachines {
-		tgType := strings.Split(reflect.TypeOf(tg).String(), "*kubeml.")[1]
+		tgType := strings.Split(reflect.TypeOf(tg).String(), "*k8sml.")[1]
 
 		module := terraform.NewModule(target.GetID(), provider, "targetgroupattachment")
 		module.AddVariable(tgType, "${module." + tg.ID + "." + strings.ToLower(tgType) + "}")

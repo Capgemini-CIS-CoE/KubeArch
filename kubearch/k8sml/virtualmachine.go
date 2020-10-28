@@ -1,7 +1,7 @@
-package kubeml
+package k8sml
 
 import (
-    ansible "kubearch/kubearch/proletarian/ansible"
+    ansible "KubeArch/kubearch/proletarian/ansible"
 )
 
 type VirtualMachine interface {

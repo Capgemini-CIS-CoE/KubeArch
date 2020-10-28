@@ -1,9 +1,9 @@
-package kubeml
+package k8sml
 
 import (
 	"reflect"
 	"strings"
-	terraform "kubearch/kubearch/proletarian/terraform"
+	terraform "KubeArch/kubearch/proletarian/terraform"
 )
 
 type InternetGateway struct {
@@ -46,10 +46,10 @@ func (internetGateway *InternetGateway) ExportModule() error {
 	e := reflect.ValueOf(internetGateway).Elem()
 
 	cloud := internetGateway.Cloud
-	provider := strings.Split(cloud.GetCloudProvider().GetType(), "*kubeml.")[1]
-	cloudType := strings.Split(reflect.TypeOf(cloud).String(), "*kubeml.")[1]
+	provider := strings.Split(cloud.GetCloudProvider().GetType(), "*k8sml.")[1]
+	cloudType := strings.Split(reflect.TypeOf(cloud).String(), "*k8sml.")[1]
 
-	module := terraform.NewModule(internetGateway.ID, provider, strings.Split(reflect.TypeOf(internetGateway).String(), "*kubeml.")[1])
+	module := terraform.NewModule(internetGateway.ID, provider, strings.Split(reflect.TypeOf(internetGateway).String(), "*k8sml.")[1])
 	for i := 0; i < e.NumField(); i++ {
 		key := e.Type().Field(i).Name
 		value := e.Field(i).Interface()

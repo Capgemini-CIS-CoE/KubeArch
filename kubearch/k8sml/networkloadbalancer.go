@@ -1,10 +1,10 @@
-package kubeml
+package k8sml
 
 import (
 	"gopkg.in/yaml.v3"
 	"reflect"
 	"strings"
-	terraform "kubearch/kubearch/proletarian/terraform"
+	terraform "KubeArch/kubearch/proletarian/terraform"
 )
 
 type NetworkLoadBalancer struct {
@@ -60,13 +60,13 @@ func (nlb *NetworkLoadBalancer) AddRuntimeVariable(key, value string) {
 func (nlb *NetworkLoadBalancer) ExportModule() error {
 	e := reflect.ValueOf(nlb).Elem()
 
-	provider := strings.Split(nlb.Subnet.Kubernetes.Cloud.GetCloudProvider().GetType(), "*kubeml.")[1]
+	provider := strings.Split(nlb.Subnet.Kubernetes.Cloud.GetCloudProvider().GetType(), "*k8sml.")[1]
 	subnet := nlb.Subnet
-	nlbType := strings.Split(reflect.TypeOf(nlb).String(), "*kubeml.")[1]
-	subnetType := strings.Split(reflect.TypeOf(subnet).String(), "*kubeml.")[1]
-	tgType := strings.Split(reflect.TypeOf(nlb.TargetGroup).String(), "*kubeml.")[1]
+	nlbType := strings.Split(reflect.TypeOf(nlb).String(), "*k8sml.")[1]
+	subnetType := strings.Split(reflect.TypeOf(subnet).String(), "*k8sml.")[1]
+	tgType := strings.Split(reflect.TypeOf(nlb.TargetGroup).String(), "*k8sml.")[1]
 
-	module := terraform.NewModule(nlb.ID, provider, strings.Split(reflect.TypeOf(nlb).String(), "*kubeml.")[1])
+	module := terraform.NewModule(nlb.ID, provider, strings.Split(reflect.TypeOf(nlb).String(), "*k8sml.")[1])
 	for i := 0; i < e.NumField(); i++ {
 		key := e.Type().Field(i).Name
 		value := e.Field(i).Interface()

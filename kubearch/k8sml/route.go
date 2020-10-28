@@ -1,10 +1,10 @@
-package kubeml
+package k8sml
 
 import (
 	"gopkg.in/yaml.v3"
 	"reflect"
 	"strings"
-	terraform "kubearch/kubearch/proletarian/terraform"
+	terraform "KubeArch/kubearch/proletarian/terraform"
 )
 
 type Route struct {
@@ -51,9 +51,9 @@ func (route *Route) AddRuntimeVariable(key, value string) {
 func (route *Route) ExportModule() error {
 	e := reflect.ValueOf(route).Elem()
 
-	provider := strings.Split(route.RouteTable.Subnet.Kubernetes.Cloud.GetCloudProvider().GetType(), "*kubeml.")[1]
-	routeTableType := strings.Split(reflect.TypeOf(route.RouteTable).String(), "*kubeml.")[1]
-	targetType := strings.Split(reflect.TypeOf(route.Target).String(), "*kubeml.")[1]
+	provider := strings.Split(route.RouteTable.Subnet.Kubernetes.Cloud.GetCloudProvider().GetType(), "*k8sml.")[1]
+	routeTableType := strings.Split(reflect.TypeOf(route.RouteTable).String(), "*k8sml.")[1]
+	targetType := strings.Split(reflect.TypeOf(route.Target).String(), "*k8sml.")[1]
 	var targetVariable string
 
 	switch targetType {
@@ -63,7 +63,7 @@ func (route *Route) ExportModule() error {
 		targetVariable = "NatGateway"
 	}
 
-	module := terraform.NewModule(route.ID, provider, strings.Split(reflect.TypeOf(route).String(), "*kubeml.")[1])
+	module := terraform.NewModule(route.ID, provider, strings.Split(reflect.TypeOf(route).String(), "*k8sml.")[1])
 	for i := 0; i < e.NumField(); i++ {
 		key := e.Type().Field(i).Name
 		value := e.Field(i).Interface()

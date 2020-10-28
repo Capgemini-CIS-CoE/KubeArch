@@ -1,11 +1,11 @@
-package kubeml
+package k8sml
 
 import (
 	"gopkg.in/yaml.v3"
 	"errors"
 	"reflect"
 	"strings"
-	terraform "kubearch/kubearch/proletarian/terraform"
+	terraform "KubeArch/kubearch/proletarian/terraform"
 )
 
 type AmazonWebServices struct {

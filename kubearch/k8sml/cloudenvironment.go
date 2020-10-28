@@ -1,4 +1,4 @@
-package kubeml
+package k8sml
 
 import (
 	"errors"

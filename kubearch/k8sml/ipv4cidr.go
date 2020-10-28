@@ -1,10 +1,10 @@
-package kubeml
+package k8sml
 
 import (
 	"reflect"
 	"strings"
 	"net"
-	terraform "kubearch/kubearch/proletarian/terraform"
+	terraform "KubeArch/kubearch/proletarian/terraform"
 )
 
 type IPv4Cidr struct {
@@ -62,10 +62,10 @@ func (cidr *IPv4Cidr) ExportModule() error {
 	e := reflect.ValueOf(cidr).Elem()
 
 	cloud := cidr.Cloud
-	provider := strings.Split(cloud.GetCloudProvider().GetType(), "*kubeml.")[1]
-	cloudType := strings.Split(reflect.TypeOf(cloud).String(), "*kubeml.")[1]
+	provider := strings.Split(cloud.GetCloudProvider().GetType(), "*k8sml.")[1]
+	cloudType := strings.Split(reflect.TypeOf(cloud).String(), "*k8sml.")[1]
 
-	module := terraform.NewModule(cidr.ID, provider, strings.Split(reflect.TypeOf(cidr).String(), "*kubeml.")[1])
+	module := terraform.NewModule(cidr.ID, provider, strings.Split(reflect.TypeOf(cidr).String(), "*k8sml.")[1])
 	for i := 0; i < e.NumField(); i++ {
 		key := e.Type().Field(i).Name
 		value := e.Field(i).Interface()

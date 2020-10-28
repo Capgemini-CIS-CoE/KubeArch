@@ -11,142 +11,142 @@ import (
 	"os"
 	"os/exec"
 	"gopkg.in/yaml.v3"
-	kubeml "kubearch/kubearch/kubeml"
-    ansible "kubearch/kubearch/proletarian/ansible"
+	k8sml "KubeArch/kubearch/k8sml"
+    ansible "KubeArch/kubearch/proletarian/ansible"
 )
 
 type ProductionPlan struct {
-	ProductionOrder []kubeml.Infrastructure
-	Products map[string][]kubeml.KubeML
+	ProductionOrder []k8sml.Infrastructure
+	Products map[string][]k8sml.K8sML
   }
 
   func (productionPlan *ProductionPlan) Create(data []byte) *ProductionPlan {
-	cloudEnvironment := kubeml.NewCloudEnvironment()
+	cloudEnvironment := k8sml.NewCloudEnvironment()
     err := yaml.Unmarshal(data, &cloudEnvironment)
     if err != nil {
         log.Fatalf("error: %v", err)
     }
 	
-	productionOrder := make([]kubeml.Infrastructure, 0)
-	products := make(map[string][]kubeml.KubeML, 0)
+	productionOrder := make([]k8sml.Infrastructure, 0)
+	products := make(map[string][]k8sml.K8sML, 0)
   
 	for _, cloudProvider := range cloudEnvironment.CloudProvider {
 	  productionOrder = append(productionOrder, cloudProvider)
-	  cloudProviderType := strings.Split(reflect.TypeOf(cloudProvider).String(), "*kubeml.")[1]
+	  cloudProviderType := strings.Split(reflect.TypeOf(cloudProvider).String(), "*k8sml.")[1]
 	  products[cloudProviderType] = append(products[cloudProviderType], cloudProvider)
   
 	  for _, policy := range cloudProvider.GetPolicy() {
 		productionOrder = append(productionOrder, policy)
-		policyType := strings.Split(reflect.TypeOf(policy).String(), "*kubeml.")[1]
+		policyType := strings.Split(reflect.TypeOf(policy).String(), "*k8sml.")[1]
 		products[policyType] = append(products[policyType], policy)
   
 		for _, role := range policy.Role {
 		  productionOrder = append(productionOrder, role)
-		  roleType := strings.Split(reflect.TypeOf(role).String(), "*kubeml.")[1]
+		  roleType := strings.Split(reflect.TypeOf(role).String(), "*k8sml.")[1]
 		  products[roleType] = append(products[roleType], role)
 		}
 	  }
 	  
 	  for _, cloud := range cloudProvider.GetCloud() {
 		productionOrder = append(productionOrder, cloud)
-		cloudType := strings.Split(reflect.TypeOf(cloud).String(), "*kubeml.")[1]
+		cloudType := strings.Split(reflect.TypeOf(cloud).String(), "*k8sml.")[1]
 		products[cloudType] = append(products[cloudType], cloud)
   
 		for _, cidr := range cloud.GetIPv4Cidr() {
 		  productionOrder = append(productionOrder, cidr)
-		  cidrType := strings.Split(reflect.TypeOf(cidr).String(), "*kubeml.")[1]
+		  cidrType := strings.Split(reflect.TypeOf(cidr).String(), "*k8sml.")[1]
 		  products[cidrType] = append(products[cidrType], cidr)
 		}
   
 		igw := cloud.GetInternetGateway()
 		if igw != nil {
 		  productionOrder = append(productionOrder, igw)
-		  igwType := strings.Split(reflect.TypeOf(igw).String(), "*kubeml.")[1]
+		  igwType := strings.Split(reflect.TypeOf(igw).String(), "*k8sml.")[1]
 		  products[igwType] = append(products[igwType], igw)
 		}
   
 		k8s := cloud.GetKubernetes()
-		k8sType := strings.Split(reflect.TypeOf(k8s).String(), "*kubeml.")[1]
+		k8sType := strings.Split(reflect.TypeOf(k8s).String(), "*k8sml.")[1]
 		products[k8sType] = append(products[k8sType], k8s)
   
 		for _, subnet := range k8s.Subnet {
 		  productionOrder = append(productionOrder, subnet)
-		  subnetType := strings.Split(reflect.TypeOf(subnet).String(), "*kubeml.")[1]
+		  subnetType := strings.Split(reflect.TypeOf(subnet).String(), "*k8sml.")[1]
 		  products[subnetType] = append(products[subnetType], subnet)
   
 		  for _, ngw := range subnet.NATGateway {
 			if ngw != nil {
 			  productionOrder = append(productionOrder, ngw)
-			  ngwType := strings.Split(reflect.TypeOf(ngw).String(), "*kubeml.")[1]
+			  ngwType := strings.Split(reflect.TypeOf(ngw).String(), "*k8sml.")[1]
 			  products[ngwType] = append(products[ngwType], ngw)
 			}
 		  }
   
 		  for _, routeTable := range subnet.RouteTable {
 			productionOrder = append(productionOrder, routeTable)
-			routeTableType := strings.Split(reflect.TypeOf(routeTable).String(), "*kubeml.")[1]
+			routeTableType := strings.Split(reflect.TypeOf(routeTable).String(), "*k8sml.")[1]
 			products[routeTableType] = append(products[routeTableType], routeTable)
   
 			for _, route := range routeTable.Route {
 			  productionOrder = append(productionOrder, route)
-			  routeType := strings.Split(reflect.TypeOf(route).String(), "*kubeml.")[1]
+			  routeType := strings.Split(reflect.TypeOf(route).String(), "*k8sml.")[1]
 			  products[routeType] = append(products[routeType], route)
 			}
 		  }
   
 		  for _, nlb := range subnet.NetworkLoadBalancer {
-			nlbType := strings.Split(reflect.TypeOf(nlb).String(), "*kubeml.")[1]
+			nlbType := strings.Split(reflect.TypeOf(nlb).String(), "*k8sml.")[1]
 			products[nlbType] = append(products[nlbType], nlb)
 		  }
   
 		  for _, virtualFirewall := range subnet.VirtualFirewall {
 			productionOrder = append(productionOrder, virtualFirewall)
-			virtualFirewallType := strings.Split(reflect.TypeOf(virtualFirewall).String(), "*kubeml.")[1]
+			virtualFirewallType := strings.Split(reflect.TypeOf(virtualFirewall).String(), "*k8sml.")[1]
 			products[virtualFirewallType] = append(products[virtualFirewallType], virtualFirewall)
 	
 			for _, ingress := range virtualFirewall.GetIngress() {
 			  productionOrder = append(productionOrder, ingress)
-			  ingressType := strings.Split(reflect.TypeOf(ingress).String(), "*kubeml.")[1]
+			  ingressType := strings.Split(reflect.TypeOf(ingress).String(), "*k8sml.")[1]
 			  products[ingressType] = append(products[ingressType], ingress)
 			}
   
 			for _, egress := range virtualFirewall.GetEgress() {
 			  productionOrder = append(productionOrder, egress)
-			  egressType := strings.Split(reflect.TypeOf(egress).String(), "*kubeml.")[1]
+			  egressType := strings.Split(reflect.TypeOf(egress).String(), "*k8sml.")[1]
 			  products[egressType] = append(products[egressType], egress)
 			}
   
 			for _, role := range virtualFirewall.GetRoles() {
-			  roleType := strings.Split(reflect.TypeOf(role).String(), "*kubeml.")[1]
+			  roleType := strings.Split(reflect.TypeOf(role).String(), "*k8sml.")[1]
 			  products[roleType] = append(products[roleType], role)
 			  for _, vm := range role.VirtualMachines {
 				productionOrder = append(productionOrder, vm)
-				vmType := strings.Split(reflect.TypeOf(vm).String(), "*kubeml.")[1]
+				vmType := strings.Split(reflect.TypeOf(vm).String(), "*k8sml.")[1]
 				products[vmType] = append(products[vmType], vm)
 				
-				keyType := strings.Split(reflect.TypeOf(vm.GetKey()).String(), "*kubeml.")[1]
+				keyType := strings.Split(reflect.TypeOf(vm.GetKey()).String(), "*k8sml.")[1]
 				products[keyType] = append(products[keyType], vm.GetKey())
   
-				imageType := strings.Split(reflect.TypeOf(vm.GetImage()).String(), "*kubeml.")[1]
+				imageType := strings.Split(reflect.TypeOf(vm.GetImage()).String(), "*k8sml.")[1]
 				products[imageType] = append(products[imageType], vm.GetImage())
 			  }
 			}
   
 			for _, tg := range virtualFirewall.GetTargetGroups() {
-			  tgType := strings.Split(reflect.TypeOf(tg).String(), "*kubeml.")[1]
+			  tgType := strings.Split(reflect.TypeOf(tg).String(), "*k8sml.")[1]
 			  products[tgType] = append(products[tgType], tg)
 			  role := tg.Target
-			  roleType := strings.Split(reflect.TypeOf(role).String(), "*kubeml.")[1]
+			  roleType := strings.Split(reflect.TypeOf(role).String(), "*k8sml.")[1]
 			  products[roleType] = append(products[roleType], role)
 			  for _, vm := range role.VirtualMachines {
 				productionOrder = append(productionOrder, vm)
-				vmType := strings.Split(reflect.TypeOf(vm).String(), "*kubeml.")[1]
+				vmType := strings.Split(reflect.TypeOf(vm).String(), "*k8sml.")[1]
 				products[vmType] = append(products[vmType], vm)
 				
-				keyType := strings.Split(reflect.TypeOf(vm.GetKey()).String(), "*kubeml.")[1]
+				keyType := strings.Split(reflect.TypeOf(vm.GetKey()).String(), "*k8sml.")[1]
 				products[keyType] = append(products[keyType], vm.GetKey())
   
-				imageType := strings.Split(reflect.TypeOf(vm.GetImage()).String(), "*kubeml.")[1]
+				imageType := strings.Split(reflect.TypeOf(vm.GetImage()).String(), "*k8sml.")[1]
 				products[imageType] = append(products[imageType], vm.GetImage())
 			  }
 			}
@@ -194,7 +194,7 @@ type ProductionPlan struct {
   
   func (productionPlan *ProductionPlan) DeploySoftware(ssh string) error {
 	for _, product := range productionPlan.Products["Role"] {
-	  role := product.(*kubeml.Role)
+	  role := product.(*k8sml.Role)
 	  if err := role.ExportInventory(); err != nil {
 		return err
 	  }
@@ -211,26 +211,26 @@ type ProductionPlan struct {
   
 	playbook := ansible.NewPlaybook()
   
-	localhost := new(kubeml.Role)
+	localhost := new(k8sml.Role)
 	localhost.ID = "localhost"
 	localhost.Software = make([]string, 0)
 	localhost.Software = append(localhost.Software, "kubearch_localhost")
 	productionPlan.Products["Role"] = append(productionPlan.Products["Role"], localhost)
   
-	jumphost := new(kubeml.Role)
+	jumphost := new(k8sml.Role)
 	jumphost.ID = "Jumphost"
 	jumphost.Software = make([]string, 0)
 	jumphost.Software = append(jumphost.Software, "kubearch_public_hosts")
 	productionPlan.Products["Role"] = append(productionPlan.Products["Role"], jumphost)
   
-	all := new(kubeml.Role)
+	all := new(k8sml.Role)
 	all.ID = "all"
 	all.Software = make([]string, 0)
 	all.Software = append(all.Software, "kubearch_all")
 	productionPlan.Products["Role"] = append(productionPlan.Products["Role"], all)
   
 	for _, product := range productionPlan.Products["Role"] {
-	  role := product.(*kubeml.Role)
+	  role := product.(*k8sml.Role)
 	  playbook.AddSoftwareStack(role.ID, role.Software)
 	}
   
@@ -267,35 +267,35 @@ type ProductionPlan struct {
   }
   
   func (productionPlan *ProductionPlan) Correction() {
-	jumpHosts := make([]kubeml.VirtualMachine, 0)
+	jumpHosts := make([]k8sml.VirtualMachine, 0)
   
 	iamroles := productionPlan.Products["IAMRole"]
-	var mRole *kubeml.IAMRole
-	var wRole *kubeml.IAMRole
+	var mRole *k8sml.IAMRole
+	var wRole *k8sml.IAMRole
 	for _, iamrole := range iamroles {
 	  if iamrole.GetID() == "aws-cloudprovider-master" {
-		mRole = iamrole.(*kubeml.IAMRole)
+		mRole = iamrole.(*k8sml.IAMRole)
 	  } else {
-		wRole = iamrole.(*kubeml.IAMRole)
+		wRole = iamrole.(*k8sml.IAMRole)
 	  }
 	}
 	
 	for _, route := range productionPlan.Products["Route"] {
-	  route := route.(*kubeml.Route)
+	  route := route.(*k8sml.Route)
 	  targetID := route.Target.GetTargetID()
   
 	  switch route.Target.(type) {
-	  case *kubeml.InternetGateway:
+	  case *k8sml.InternetGateway:
 		for _, igw := range productionPlan.Products["InternetGateway"] {
-		  igw := igw.(*kubeml.InternetGateway)
+		  igw := igw.(*k8sml.InternetGateway)
   
 		  if targetID == igw.ID {
 			route.Target = igw
 		  }
 		}
-	  case *kubeml.NATGateway:
+	  case *k8sml.NATGateway:
 		for _, ngw := range productionPlan.Products["NATGateway"] {
-		  ngw := ngw.(*kubeml.NATGateway)
+		  ngw := ngw.(*k8sml.NATGateway)
   
 		  if targetID == ngw.ID {
 			route.Target = ngw
@@ -305,7 +305,7 @@ type ProductionPlan struct {
 	}
   
 	for _, product := range productionPlan.Products["Role"] {
-	  role := product.(*kubeml.Role)
+	  role := product.(*k8sml.Role)
   
 	  if role.ID == "Jumphost" {
 		jumpHosts = role.VirtualMachines
@@ -313,7 +313,7 @@ type ProductionPlan struct {
 	}
   
 	for _, product := range productionPlan.Products["Role"] {
-	  role := product.(*kubeml.Role)
+	  role := product.(*k8sml.Role)
   
 	  for _, vm := range role.VirtualMachines {
 		vm.SetJumpHosts(jumpHosts)
@@ -321,11 +321,11 @@ type ProductionPlan struct {
 	}
   
 	for _, product := range productionPlan.Products["TargetGroup"] {
-	  tg := product.(*kubeml.TargetGroup)
+	  tg := product.(*k8sml.TargetGroup)
 	  lbID := tg.LoadBalancer.ID
   
 	  for _, product := range productionPlan.Products["NetworkLoadBalancer"] {
-		nlb := product.(*kubeml.NetworkLoadBalancer)
+		nlb := product.(*k8sml.NetworkLoadBalancer)
   
 		if nlb.ID == lbID { 
 		  tg.LoadBalancer = nlb
@@ -335,7 +335,7 @@ type ProductionPlan struct {
 	}
   
 	for _, vm := range productionPlan.Products["EC2Instance"] {
-	  instance := vm.(*kubeml.EC2Instance)
+	  instance := vm.(*k8sml.EC2Instance)
 	  if instance.IAMRole != nil && instance.IAMRole.ID == "aws-cloudprovider-master" {
 		instance.IAMRole = mRole
 		mRole.VirtualMachine = append(mRole.VirtualMachine, instance)
@@ -407,10 +407,10 @@ type ProductionPlan struct {
   
   func (productionPlan *ProductionPlan) Update(productType string) error {
 	for _, product := range productionPlan.Products[productType] {
-	  runtimeVariables := product.(kubeml.Infrastructure).GetRuntimeVariables()
+	  runtimeVariables := product.(k8sml.Infrastructure).GetRuntimeVariables()
   
 	  for key, _ := range runtimeVariables {
-		productType = strings.Split(reflect.TypeOf(product).String(), "*kubeml.")[1]
+		productType = strings.Split(reflect.TypeOf(product).String(), "*k8sml.")[1]
 		variable := product.GetID() + "_" + strings.ToLower(productType) + "_" + key
   
 		cmd := exec.Command("terraform", "output", variable)
@@ -443,7 +443,7 @@ type ProductionPlan struct {
 	return nil
   }
   
-  func (productionPlan *ProductionPlan) GetProduct(element, id string) kubeml.KubeML {
+  func (productionPlan *ProductionPlan) GetProduct(element, id string) k8sml.K8sML {
 	for _ , product := range productionPlan.Products[element] {
 	  if product.GetID() == id {
 		return product

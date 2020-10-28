@@ -1,12 +1,11 @@
-package kubeml
+package k8sml
 
-type Cloud interface {
+type CloudProvider interface {
 	GetID() string
 	GetVariableValue(variable string) interface{}
-	GetCloudProvider() CloudProvider
-	GetIPv4Cidr() []*IPv4Cidr
-	GetInternetGateway() *InternetGateway
-	GetKubernetes() *Kubernetes
+	GetCloud() []Cloud
+	GetType() string
+	GetPolicy() []*IAMPolicy
 	AddRuntimeVariable(key, value string)
 	GetRuntimeVariables() map[string]string
 	ExportModule() error

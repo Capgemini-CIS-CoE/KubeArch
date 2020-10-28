@@ -1,22 +1,22 @@
-package kubeml
+package k8sml
 
 import (
 	"reflect"
 	"strings"
 )
 
-type Image struct {
+type Key struct {
 	ID string `yaml:"id"`
-	User string `yaml:"user"`
-	VirtualMachine VirtualMachine
+	Path string `yaml:"path"`
+	VirtualMachines []VirtualMachine
 }
 
-func (image *Image) GetID() string {
-	return image.ID
+func (key *Key) GetID() string {
+	return key.ID
 }
 
-func (image *Image) GetVariableValue(variable string) interface{} {
-	e := reflect.ValueOf(image).Elem()
+func (key *Key) GetVariableValue(variable string) interface{} {
+	e := reflect.ValueOf(key).Elem()
 	var value interface{}
 
 	for i := 0; i < e.NumField(); i++ {

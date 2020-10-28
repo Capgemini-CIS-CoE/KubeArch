@@ -1,9 +1,9 @@
-package kubeml
+package k8sml
 
 import (
 	"reflect"
 	"strings"
-	terraform "kubearch/kubearch/proletarian/terraform"
+	terraform "KubeArch/kubearch/proletarian/terraform"
 )
 
 type NATGateway struct {
@@ -46,10 +46,10 @@ func (natGateway *NATGateway) ExportModule() error {
 	e := reflect.ValueOf(natGateway).Elem()
 
 	subnet := natGateway.Subnet
-	provider := strings.Split(subnet.Kubernetes.Cloud.GetCloudProvider().GetType(), "*kubeml.")[1]
-	subnetType := strings.Split(reflect.TypeOf(subnet).String(), "*kubeml.")[1]
+	provider := strings.Split(subnet.Kubernetes.Cloud.GetCloudProvider().GetType(), "*k8sml.")[1]
+	subnetType := strings.Split(reflect.TypeOf(subnet).String(), "*k8sml.")[1]
 
-	module := terraform.NewModule(natGateway.ID, provider, strings.Split(reflect.TypeOf(natGateway).String(), "*kubeml.")[1])
+	module := terraform.NewModule(natGateway.ID, provider, strings.Split(reflect.TypeOf(natGateway).String(), "*k8sml.")[1])
 	for i := 0; i < e.NumField(); i++ {
 		key := e.Type().Field(i).Name
 		value := e.Field(i).Interface()

@@ -1,4 +1,4 @@
-package kubeml
+package k8sml
 
 import (
 	"gopkg.in/yaml.v3"

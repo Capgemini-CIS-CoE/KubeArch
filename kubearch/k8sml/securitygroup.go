@@ -1,10 +1,10 @@
-package kubeml
+package k8sml
 
 import (
 	"gopkg.in/yaml.v3"
 	"reflect"
 	"strings"
-	terraform "kubearch/kubearch/proletarian/terraform"
+	terraform "KubeArch/kubearch/proletarian/terraform"
 )
 
 type SecurityGroup struct {
@@ -75,10 +75,10 @@ func (sg *SecurityGroup) ExportModule() error {
 	e := reflect.ValueOf(sg).Elem()
 
 	cloud := sg.Subnet.Kubernetes.Cloud
-	provider := strings.Split(cloud.GetCloudProvider().GetType(), "*kubeml.")[1]
-	cloudType := strings.Split(reflect.TypeOf(cloud).String(), "*kubeml.")[1]
+	provider := strings.Split(cloud.GetCloudProvider().GetType(), "*k8sml.")[1]
+	cloudType := strings.Split(reflect.TypeOf(cloud).String(), "*k8sml.")[1]
 
-	module := terraform.NewModule(sg.ID, provider, strings.Split(reflect.TypeOf(sg).String(), "*kubeml.")[1])
+	module := terraform.NewModule(sg.ID, provider, strings.Split(reflect.TypeOf(sg).String(), "*k8sml.")[1])
 	for i := 0; i < e.NumField(); i++ {
 		key := e.Type().Field(i).Name
 		value := e.Field(i).Interface()

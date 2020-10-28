@@ -1,10 +1,10 @@
-package kubeml
+package k8sml
 
 import (
 	"gopkg.in/yaml.v3"
 	"reflect"
 	"strings"
-	terraform "kubearch/kubearch/proletarian/terraform"
+	terraform "KubeArch/kubearch/proletarian/terraform"
 )
 
 type RouteTable struct {
@@ -49,12 +49,12 @@ func (routeTable *RouteTable) ExportModule() error {
 	e := reflect.ValueOf(routeTable).Elem()
 
 	cloud := routeTable.Subnet.Kubernetes.Cloud
-	provider := strings.Split(cloud.GetCloudProvider().GetType(), "*kubeml.")[1]
-	cloudType := strings.Split(reflect.TypeOf(cloud).String(), "*kubeml.")[1]
+	provider := strings.Split(cloud.GetCloudProvider().GetType(), "*k8sml.")[1]
+	cloudType := strings.Split(reflect.TypeOf(cloud).String(), "*k8sml.")[1]
 	subnet := routeTable.Subnet
-	subnetType := strings.Split(reflect.TypeOf(subnet).String(), "*kubeml.")[1]
+	subnetType := strings.Split(reflect.TypeOf(subnet).String(), "*k8sml.")[1]
 
-	module := terraform.NewModule(routeTable.ID, provider, strings.Split(reflect.TypeOf(routeTable).String(), "*kubeml.")[1])
+	module := terraform.NewModule(routeTable.ID, provider, strings.Split(reflect.TypeOf(routeTable).String(), "*k8sml.")[1])
 	for i := 0; i < e.NumField(); i++ {
 		key := e.Type().Field(i).Name
 		value := e.Field(i).Interface()

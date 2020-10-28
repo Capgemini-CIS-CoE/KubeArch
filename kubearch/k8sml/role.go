@@ -1,11 +1,11 @@
-package kubeml
+package k8sml
 
 import (
   "gopkg.in/yaml.v3"
   "errors"
   "reflect"
   "strings"
-  ansible "kubearch/kubearch/proletarian/ansible"
+  ansible "KubeArch/kubearch/proletarian/ansible"
 )
 
 type Role struct {
@@ -94,13 +94,13 @@ func (role *Role) UnmarshalYAML(value *yaml.Node) error {
     role.Software = append(role.Software, "docker", "kubeadm", "kubelet", "controlplane", "kubectl")
     if role.TargetGroup != nil {
       role.Software = append(role.Software, role.TargetGroup.VirtualFirewall.GetSubnet().Kubernetes.ContainerNetworkInterface.ID)
-      switch strings.Split(reflect.TypeOf(role.TargetGroup.VirtualFirewall.GetSubnet().Kubernetes.Cloud.GetCloudProvider()).String(), "*kubeml.")[1] {
+      switch strings.Split(reflect.TypeOf(role.TargetGroup.VirtualFirewall.GetSubnet().Kubernetes.Cloud.GetCloudProvider()).String(), "*k8sml.")[1] {
       case "AmazonWebServices":
         role.Software = append(role.Software, "aws_provider")
       }
     } else {
       role.Software = append(role.Software, role.VirtualFirewall.GetSubnet().Kubernetes.ContainerNetworkInterface.ID)
-      switch strings.Split(reflect.TypeOf(role.VirtualFirewall.GetSubnet().Kubernetes.Cloud.GetCloudProvider().GetID()).String(), "*kubeml.")[1] {
+      switch strings.Split(reflect.TypeOf(role.VirtualFirewall.GetSubnet().Kubernetes.Cloud.GetCloudProvider().GetID()).String(), "*k8sml.")[1] {
       case "AmazonWebServices":
         role.Software = append(role.Software, "aws_provider")
       }
