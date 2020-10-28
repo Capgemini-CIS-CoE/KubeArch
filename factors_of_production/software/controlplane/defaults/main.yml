@@ -1,0 +1,9 @@
+---
+id = !kubearch{{ Kubernetes.test-cluster.id }}
+port = !kubearch{{ Kubernetes.test-cluster.port }}
+cidrpod = !kubearch{{ Kubernetes.test-cluster.cidrpod }}
+cidrservice = !kubearch{{ Kubernetes.test-cluster.cidrservice }}
+domain = !kubearch{{ Kubernetes.test-cluster.domain }}
+ip = !kubearch{{ NetworkLoadBalancer.kubernetes-loadbalancer.ip }}
+provider = !kubearch{{ AmazonWebServices.aws.id }}
+region = !kubearch{{ AmazonWebServices.aws.region }}

@@ -1,0 +1,53 @@
+---
+- name: Copy the bash script
+  template:
+    src: set_known_hosts.sh.j2
+    dest: set_known_hosts.sh
+    mode: +x
+  when: lifecycle == "prep"
+
+- name: Execute the bash script
+  shell: ./set_known_hosts.sh
+  when: lifecycle == "prep"
+
+- name: Cleanup
+  file:
+    path: "set_known_hosts.sh"
+    state: absent
+  when: lifecycle == "prep"
+
+- name: Copy AWS private ssh key
+  copy:
+    src: "{{ key_path }}/id_rsa_floble"
+    dest: "/home/{{ user }}/.ssh/id_rsa"
+    mode: 0600
+  when: lifecycle == "ssh_gw"
+
+- name: Create ssh key pair
+  openssh_keypair:
+    path: "/home/{{ user }}/.ssh/id_rsa"
+    size: 4096
+    mode: 0600
+  when: lifecycle == "init"
+
+- name: Store ssh public key into /tmp directory
+  fetch:
+    src: "/home/{{ user }}/.ssh/id_rsa.pub"
+    dest: "/tmp/k8s_public_keys/{{ inventory_hostname }}_id_rsa.pub"
+    flat: yes
+  when: lifecycle == "init"
+
+- name: Set authorized key
+  authorized_key:
+    user: "{{ user }}"
+    state: present
+    key: "{{ lookup('file', '{{ item }}') }}"
+  with_fileglob:
+    - /tmp/k8s_public_keys/*
+  when: lifecycle == "init"
+
+- name: Cleanup
+  file:
+    path: /tmp/k8s_public_keys
+    state: absent
+  when: lifecycle == "clean"

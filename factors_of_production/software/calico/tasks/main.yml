@@ -1,0 +1,6 @@
+---
+- name: install overlay network
+  become: yes
+  become_user: "{{ user }}"
+  shell: kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+  when: inventory_hostname == hostvars[groups['Controlplane'][0]]['inventory_hostname']

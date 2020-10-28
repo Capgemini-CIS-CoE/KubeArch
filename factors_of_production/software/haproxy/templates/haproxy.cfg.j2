@@ -1,0 +1,27 @@
+global
+	user haproxy
+	group haproxy
+
+defaults
+	mode http
+	log global
+    retries 2
+    timeout connect 3000ms
+    timeout client  5000ms
+    timeout server  5000ms
+
+frontend kubernetes
+{% for lb in groups['LoadBalancer'] %}
+        bind {{ hostvars[lb]['ansible_host'] }}:{{ port }}
+{% endfor %}
+        option tcplog
+        mode tcp
+        default_backend kubernetes-controlplane
+
+backend kubernetes-controlplane
+        mode tcp
+        balance roundrobin
+        option tcp-check
+{% for controlplane in groups['Controlplane'] %}
+        server {{ controlplane }} {{ hostvars[controlplane]['ansible_host'] }}:{{ port }} check fall 3 rise 2
+{% endfor %}

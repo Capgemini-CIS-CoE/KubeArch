@@ -1,0 +1,23 @@
+---
+- name: copy the bash script
+  template:
+    src: set_known_hosts.sh.j2
+    dest: set_known_hosts.sh
+    mode: +x
+
+- name: execute the bash script
+  shell: ./set_known_hosts.sh
+
+- name: create tmp directory for worker
+  file:
+    path: /tmp/worker
+    state: directory
+
+- name: copy the join configuration
+  template:
+    src: worker-join.yml.j2
+    dest: /tmp/worker/worker-join.yml
+
+- name: add worker to cluster
+  become: yes
+  shell: "kubeadm join --config=/tmp/worker/worker-join.yml"

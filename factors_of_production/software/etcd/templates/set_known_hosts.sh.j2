@@ -1,0 +1,5 @@
+#!/bin/bash
+
+{% for host in groups['Etcd'] %}
+ssh-keyscan -t rsa -H {{ hostvars[host]['ansible_host'] }} >> ~/.ssh/known_hosts
+{% endfor %}

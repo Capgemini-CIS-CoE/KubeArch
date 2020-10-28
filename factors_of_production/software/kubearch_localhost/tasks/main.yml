@@ -1,0 +1,14 @@
+---
+- name: Copy the bash script
+  template:
+    src: set_known_hosts.sh.j2
+    dest: set_known_hosts.sh
+    mode: +x
+
+- name: Execute the bash script
+  shell: ./set_known_hosts.sh
+
+- name: Cleanup
+  file:
+    path: "set_known_hosts.sh"
+    state: absent

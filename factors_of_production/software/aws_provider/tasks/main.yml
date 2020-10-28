@@ -1,0 +1,21 @@
+---
+- name: copy manifests for the aws cloud provider
+  template:
+    src: "{{ item }}"
+    dest: "{{ item }}"
+  with_items:
+    - "rbac.yaml"
+    - "ds.yaml"
+  when: inventory_hostname == hostvars[groups['Controlplane'][0]]['inventory_hostname']
+
+- name: deploy the rbac for the aws cloud provider
+  become: yes
+  become_user: "{{ user }}"
+  shell: "kubectl apply -f rbac.yaml"
+  when: inventory_hostname == hostvars[groups['Controlplane'][0]]['inventory_hostname']
+
+- name: deploy the daemonset for the aws cloud provider
+  become: yes
+  become_user: "{{ user }}"
+  shell: "kubectl apply -f ds.yaml"
+  when: inventory_hostname == hostvars[groups['Controlplane'][0]]['inventory_hostname']

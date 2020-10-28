@@ -1,0 +1,105 @@
+---
+- name: copy the bash script
+  template:
+    src: set_known_hosts.sh.j2
+    dest: set_known_hosts.sh
+    mode: +x
+
+- name: execute the bash script
+  shell: ./set_known_hosts.sh
+
+- name: create tmp directory for apiserver
+  file:
+    path: /tmp/apiserver
+    state: directory
+
+- name: create directory for etcd certificates
+  become: yes
+  file:
+    path: /etc/kubernetes/pki/etcd
+    state: directory
+    group: root
+
+- name: copy etcd certificate to controlplane host
+  shell: "scp {{ hostvars[groups['Etcd'][0]]['ansible_user'] }}@{{ hostvars[groups['Etcd'][0]]['ansible_host'] }}:/etc/kubernetes/pki/etcd/{{ item }} /tmp/apiserver/{{ item }}"
+  with_items:
+    - "ca.crt"
+    - "ca.key"
+
+- name: copy apiserver certificate to controlplane host
+  shell: "scp {{ hostvars[groups['Etcd'][0]]['ansible_user'] }}@{{ hostvars[groups['Etcd'][0]]['ansible_host'] }}:/etc/kubernetes/pki/{{ item }} /tmp/apiserver/{{ item }}"
+  with_items:
+    - "apiserver-etcd-client.crt"
+    - "apiserver-etcd-client.key"
+
+- name: copy etcd certificate and key to appropriate directory
+  become: yes
+  copy:
+    src: "/tmp/apiserver/{{ item }}"
+    dest: "/etc/kubernetes/pki/etcd/{{ item }}"
+    remote_src: yes
+  with_items:
+    - "ca.crt"
+    - "ca.key"
+
+- name: copy apiserver certificate and key to appropriate directory
+  become: yes
+  copy:
+    src: "/tmp/apiserver/{{ item }}"
+    dest: "/etc/kubernetes/pki/{{ item }}"
+    remote_src: yes
+  with_items:
+    - "apiserver-etcd-client.crt"
+    - "apiserver-etcd-client.key"
+
+- name: copy the kubeadm configuration
+  become: yes
+  template:
+    src: kubeadm-config.yml.j2
+    dest: /tmp/apiserver/kubeadm-config.yml
+
+- name: initialize the cluster
+  become: yes
+  shell: "kubeadm init --config /tmp/apiserver/kubeadm-config.yml --upload-certs"
+  when: inventory_hostname == hostvars[groups['Controlplane'][0]]['inventory_hostname']
+
+- name: get join command
+  become: yes
+  shell: kubeadm token create --print-join-command
+  register: join_command_raw
+  when: inventory_hostname == hostvars[groups['Controlplane'][0]]['inventory_hostname']
+
+- name: get certificate-key
+  become: yes
+  shell: kubeadm init phase upload-certs --upload-certs --config /tmp/apiserver/kubeadm-config.yml
+  register: certificate
+  when: inventory_hostname == hostvars[groups['Controlplane'][0]]['inventory_hostname']
+
+- name: set certificate-key
+  become: yes
+  set_fact:
+    certificate_key: "{{ certificate.stdout_lines[2] }}"
+  when: inventory_hostname == hostvars[groups['Controlplane'][0]]['inventory_hostname']
+
+- name: set token
+  become: yes
+  set_fact:
+    token: "{{ join_command_raw.stdout_lines[0].split('--')[1].split('token')[1] | replace(' ', '') }}"
+  when: inventory_hostname == hostvars[groups['Controlplane'][0]]['inventory_hostname']
+
+- name: set ca-cert-hash
+  become: yes
+  set_fact:
+    ca_cert_hash: "{{ join_command_raw.stdout_lines[0].split('--')[2].split('discovery-token-ca-cert-hash')[1] | replace(' ', '') }}"
+  when: inventory_hostname == hostvars[groups['Controlplane'][0]]['inventory_hostname']
+
+- name: copy the join configuration
+  template:
+    src: controlplane-join.yml.j2
+    dest: /tmp/apiserver/controlplane-join.yml
+  when: inventory_hostname != hostvars[groups['Controlplane'][0]]['inventory_hostname']
+
+- name: add master to cluster
+  become: yes
+  shell: "kubeadm join --config=/tmp/apiserver/controlplane-join.yml"
+  when: inventory_hostname != hostvars[groups['Controlplane'][0]]['inventory_hostname']

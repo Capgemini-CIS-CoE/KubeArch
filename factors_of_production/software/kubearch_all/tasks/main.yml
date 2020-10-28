@@ -1,0 +1,24 @@
+---
+- name: Create ssh key pair
+  openssh_keypair:
+    path: "/home/{{ user }}/.ssh/id_rsa"
+    size: 4096
+    mode: 0600
+
+- name: Store ssh public key into /tmp directory
+  fetch:
+    src: "/home/{{ user }}/.ssh/id_rsa.pub"
+    dest: "/tmp/k8s_public_keys/{{ inventory_hostname }}_id_rsa.pub"
+    flat: yes
+
+- name: Set authorized key
+  authorized_key:
+    user: "{{ user }}"
+    state: present
+    key: "{{ lookup('file', '{{ item }}') }}"
+  with_fileglob:
+    - /tmp/k8s_public_keys/*
+
+- name: set hostname
+  become: yes
+  shell: "hostnamectl set-hostname {{ private_dns }}"

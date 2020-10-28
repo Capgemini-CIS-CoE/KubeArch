@@ -1,0 +1,51 @@
+---
+- name: install the latest version of APT Transport HTTPS
+  become: yes
+  apt:
+    name: apt-transport-https
+    state: latest
+
+- name: install the latest version of Curl
+  become: yes
+  apt:
+    name: curl
+    state: latest
+
+- name: add Kubernetes APT key
+  become: yes
+  apt_key:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    state: present
+
+- name: add Kubernetes APT repository
+  become: yes
+  apt_repository:
+    repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
+    state: present
+    filename: "kubernetes"
+
+- name: install the latest version of KubeCtl
+  become: yes
+  apt:
+    name: kubectl
+    state: latest
+    update_cache: true
+
+- name: hold back KubeCtl package
+  become: yes
+  shell: "apt-mark hold kubectl"
+
+- name: create .kube directory
+  become: yes
+  file:
+    path: "/home/{{ user }}/.kube"
+    state: directory
+    mode: 0755
+
+- name: copy admin.conf to user's kube config
+  become: yes
+  copy:
+    src: /etc/kubernetes/admin.conf
+    dest: "/home/{{ user }}/.kube/config"
+    remote_src: yes
+    owner: "{{ user }}"

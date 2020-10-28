@@ -1,0 +1,115 @@
+---
+- name: copy the bash script
+  template:
+    src: set_known_hosts.sh.j2
+    dest: set_known_hosts.sh
+    mode: +x
+
+- name: execute the bash script
+  shell: ./set_known_hosts.sh
+
+- name: configure kubelet to be service manager for etcd
+  become: yes
+  template:
+    src: 20-etcd-service-manager.conf.j2
+    dest: /etc/systemd/system/kubelet.service.d/20-etcd-service-manager.conf
+
+- name: restart service kubelet
+  become: yes
+  systemd:
+    name: kubelet
+    state: restarted
+    daemon_reload: yes
+
+- name: create tmp directories for host files
+  file:
+    path: "/tmp/etcd"
+    state: directory
+
+- name: create configuration file for etcd
+  become: yes
+  blockinfile:
+    path: /tmp/etcd/kubeadmcfg.yml
+    content: |
+      apiVersion: "kubeadm.k8s.io/v1beta2"
+      kind: ClusterConfiguration
+      etcd:
+        local:
+          serverCertSANs:
+          - "{{ ansible_default_ipv4.address }}"
+          peerCertSANs:
+          - "{{ ansible_default_ipv4.address }}"
+          extraArgs:
+            initial-cluster: {% for etcd in groups['Etcd'] %}{{ hostvars[etcd]['inventory_hostname'] }}=https://{{ hostvars[etcd]['ansible_host'] }}:2380{% if not loop.last %},{% endif %}{% endfor %} 
+            initial-cluster-state: new
+            name: {{ inventory_hostname }}
+            listen-peer-urls: https://{{ ansible_default_ipv4.address }}:2380
+            listen-client-urls: https://{{ ansible_default_ipv4.address }}:2379
+            advertise-client-urls: https://{{ ansible_default_ipv4.address }}:2379
+            initial-advertise-peer-urls: https://{{ ansible_default_ipv4.address }}:2380
+    create: yes
+
+- name: generate the certificate authority
+  become: yes
+  shell: kubeadm init phase certs etcd-ca
+  when: inventory_hostname == hostvars[groups['Etcd'][0]]['inventory_hostname']
+
+- name: create directory for certificates
+  become: yes
+  file:
+    path: /etc/kubernetes/pki/etcd
+    state: directory
+    group: root
+  when: inventory_hostname != hostvars[groups['Etcd'][0]]['inventory_hostname']
+
+- name: change permissions of certificate key
+  become: yes
+  file:
+    path: /etc/kubernetes/pki/etcd/ca.key
+    mode: "0644"
+  when: inventory_hostname == hostvars[groups['Etcd'][0]]['inventory_hostname']
+
+- name: copy ca certificate to etcd host
+  shell: "scp {{ hostvars[groups['Etcd'][0]]['ansible_user'] }}@{{ hostvars[groups['Etcd'][0]]['ansible_host'] }}:/etc/kubernetes/pki/etcd/{{ item }} /tmp/etcd/{{ item }}"
+  with_items:
+    - "ca.crt"
+    - "ca.key"
+  when: inventory_hostname != hostvars[groups['Etcd'][0]]['inventory_hostname']
+
+- name: copy ca certificate and key to appropriate directory
+  become: yes
+  copy:
+    src: "/tmp/etcd/{{ item }}"
+    dest: "/etc/kubernetes/pki/etcd/{{ item }}"
+    remote_src: yes
+  with_items:
+    - "ca.crt"
+    - "ca.key"
+  when: inventory_hostname != hostvars[groups['Etcd'][0]]['inventory_hostname']
+
+- name: create certificate for etcd-server
+  become: yes
+  shell: kubeadm init phase certs etcd-server --config=/tmp/etcd/kubeadmcfg.yml
+
+- name: create certificate for etcd-peer
+  become: yes
+  shell: kubeadm init phase certs etcd-peer --config=/tmp/etcd/kubeadmcfg.yml
+
+- name: create certificate for etcd-healthcheck-client
+  become: yes
+  shell: kubeadm init phase certs etcd-healthcheck-client --config=/tmp/etcd/kubeadmcfg.yml
+
+- name: create certificate for apiserver-etcd-client
+  become: yes
+  shell: kubeadm init phase certs apiserver-etcd-client --config=/tmp/etcd/kubeadmcfg.yml
+
+- name: change permissions of apiserver certificate key
+  become: yes
+  file:
+    path: /etc/kubernetes/pki/apiserver-etcd-client.key
+    mode: "0644"
+  when: inventory_hostname == hostvars[groups['Etcd'][0]]['inventory_hostname']
+
+- name: create the static pod manifest
+  become: yes
+  shell: kubeadm init phase etcd local --config=/tmp/etcd/kubeadmcfg.yml

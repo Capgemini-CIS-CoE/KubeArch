@@ -1,0 +1,3 @@
+---
+user = !kubearch{{ Image.ami-009c174642dba28e4.user }}
+cgroupdriver: systemd

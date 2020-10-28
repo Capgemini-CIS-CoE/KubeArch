@@ -1,0 +1,16 @@
+---
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: JoinConfiguration
+discovery:
+  bootstrapToken:
+    token: {{ hostvars[groups['Controlplane'][0]]['token'] }}
+    apiServerEndpoint: "{{ ip }}:{{ port }}"
+    caCertHashes: ["{{ hostvars[groups['Controlplane'][0]]['ca_cert_hash'] }}"]
+nodeRegistration:
+  kubeletExtraArgs:
+    cloud-provider: external
+    provider-id: {{ provider }}://{{ region }}/{{ provider_id }}
+controlPlane:
+  localAPIEndpoint:
+    advertiseAddress: {{ private_ip }}
+  certificateKey: "{{ hostvars[groups['Controlplane'][0]]['certificate_key'] }}"

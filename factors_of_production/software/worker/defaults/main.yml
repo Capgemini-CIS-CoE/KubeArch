@@ -1,0 +1,5 @@
+---
+port = !kubearch{{ Kubernetes.test-cluster.port }}
+ip = !kubearch{{ NetworkLoadBalancer.kubernetes-loadbalancer.ip }}
+provider = !kubearch{{ AmazonWebServices.aws.id }}
+region = !kubearch{{ AmazonWebServices.aws.region }}

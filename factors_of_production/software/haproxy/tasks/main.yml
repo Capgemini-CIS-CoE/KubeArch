@@ -1,0 +1,27 @@
+---
+- name: install the latest version of HAProxy
+  become: yes
+  apt:
+    name: haproxy
+    state: latest
+    update_cache: true
+
+- name: move haproxy config to remote node
+  become: yes
+  template:
+    src: haproxy.cfg.j2
+    dest: /etc/haproxy/haproxy.cfg
+
+- name: allow system services binding non-local IPs
+  become: yes
+  sysctl:
+    name: net.ipv4.ip_nonlocal_bind
+    value: "1"
+    state: present
+    reload: yes
+
+- name: restart service haproxy
+  become: yes
+  systemd:
+    name: haproxy
+    state: restarted

@@ -1,0 +1,66 @@
+---
+- name: install the latest version of APT Transport HTTPS
+  become: yes
+  apt:
+    name: apt-transport-https
+    state: latest
+
+- name: install the latest version of Curl
+  become: yes
+  apt:
+    name: curl
+    state: latest
+
+- name: add Docker APT key
+  become: yes
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- name: add Docker APT repository
+  become: yes
+  apt_repository:
+    repo: "deb [arch=amd64] https://download.docker.com/linux/{{ ansible_distribution|lower }} {{ ansible_distribution_release }} stable"
+    state: present
+    filename: "kubernetes"
+
+- name: install the latest version of Containerd
+  become: yes
+  apt:
+    name: containerd.io
+    state: latest
+    update_cache: true
+
+- name: install the latest version of Docker-CE
+  become: yes
+  apt:
+    name: docker-ce
+    state: latest
+    update_cache: true
+
+- name: install the latest version of Docker-CE-CLI
+  become: yes
+  apt:
+    name: docker-ce-cli
+    state: latest
+    update_cache: true
+
+- name: copy the daemon configuration
+  become: yes
+  template:
+    src: daemon.json.j2
+    dest: /etc/docker/daemon.json
+
+- name: create directory for docker service
+  become: yes
+  file:
+    path: /etc/systemd/system/docker.service.d
+    state: directory
+    group: root
+
+- name: restart service docker
+  become: yes
+  systemd:
+    name: docker
+    state: restarted
+    daemon_reload: yes

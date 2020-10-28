@@ -1,0 +1,32 @@
+---
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: ClusterConfiguration
+kubernetesVersion: stable
+clusterName: {{ id }}
+controlPlaneEndpoint: "{{ ip }}:{{ port }}"
+etcd:
+  external:
+    endpoints:
+    {% for etcd in groups['Etcd'] %}
+- https://{{ hostvars[etcd]['ansible_host'] }}:2379
+    {% endfor %}
+caFile: /etc/kubernetes/pki/etcd/ca.crt
+    certFile: /etc/kubernetes/pki/apiserver-etcd-client.crt
+    keyFile: /etc/kubernetes/pki/apiserver-etcd-client.key
+networking:
+  serviceSubnet: {{ cidrservice }}
+  podSubnet: {{ cidrpod }}
+  dnsDomain: {{ domain }}
+apiServer:
+  extraArgs:
+    cloud-provider: external
+controllerManager:
+  extraArgs:
+    cloud-provider: external
+---
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: InitConfiguration
+nodeRegistration:
+  kubeletExtraArgs:
+    cloud-provider: external
+    provider-id: {{ provider }}://{{ region }}/{{ provider_id }}
