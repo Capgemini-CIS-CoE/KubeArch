@@ -420,8 +420,9 @@ type ProductionPlan struct {
 		if err := cmd.Run(); err != nil {
 		  return err
 		}
-  
-		runtimeVariables[key] = strings.TrimSuffix(out.String(), "\n")
+
+		tmp := strings.TrimSuffix(out.String(), "\n")
+		runtimeVariables[key] = strings.Replace(tmp, "\"", "", -1)
 	  }
 	}
   
